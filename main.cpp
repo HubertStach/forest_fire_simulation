@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 
     std::string file_path_string;
 
-    std::string file_path_string_fixed = "D:/Code/Uczelnia/S5/mod_dys/cw5/image3.png";
+    std::string file_path_string_fixed = "D:/Code/Uczelnia/S5/mod_dys/cw5/image2.png";
 
     while (running && !WindowShouldClose()) {
         BeginDrawing();
