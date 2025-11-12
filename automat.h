@@ -14,6 +14,7 @@ struct block{
 struct Automaty{
     std::vector<std::vector<block>> pole;
 
+    int iteration_count = 0;
     bool initialised = false;
     int px=0;
     int py=0;
@@ -24,8 +25,9 @@ struct Automaty{
     int y_start = 0;
     int y_end = 0;
     int cell_size=0;
-
     int burn_prop = 0;
+
+    int wind_direction = 0;
 
     Automaty();
 

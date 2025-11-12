@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 
     SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
     InitWindow(screenWidth, screenHeight, "Symualcja pozaru lasu");
-    SetTargetFPS(60);
+    //SetTargetFPS(60);
     rlImGuiSetup(true);
 
     // Our UI state
@@ -38,11 +38,16 @@ int main(int argc, char* argv[]) {
     bool showDemoWindow = false;
     bool paint_fire = false;
 
+    automat.burn_prop = 10;
+
+    //wind directions
+    int wind_direction = 0;
+
     static char file_path[256] = "";
 
     std::string file_path_string;
 
-    std::string file_path_string_fixed = "D:/Code/Uczelnia/S5/mod_dys/cw5/image2.png";
+    std::string file_path_string_fixed = "D:/Code/Uczelnia/S5/mod_dys/cw5/image3.png";
 
     while (running && !WindowShouldClose()) {
         BeginDrawing();
@@ -77,8 +82,6 @@ int main(int argc, char* argv[]) {
         //float toolbarWidth = std::max(250.0f, ImGui::GetContentRegionAvail().x * 0.25f);
         float toolbarWidth = 250.0f;
 
-        automat.burn_prop = 10;
-
         if (ImGui::Begin("Main Window", nullptr, 
                 ImGuiWindowFlags_NoDecoration |
                 ImGuiWindowFlags_NoBringToFrontOnFocus)) {
@@ -101,21 +104,41 @@ int main(int argc, char* argv[]) {
             ImGui::InputInt("Y", &y_size);
             //ImGui::Checkbox("Losowe wartosci?", &is_random);
 
+            ImGui::NewLine();
+
             if(ImGui::Button("Generuj pole z obrazu")){
                 if(x_size != 0 ){
                     std::vector<std::vector<int>> img_matrix = prepare_matrix(file_path_string_fixed, x_size);
                     automat.init(img_matrix, screenHeight, screenWidth);
-    
+                    automat.iteration_count = 0;
+
                     x_size = img_matrix.size();
                     y_size = img_matrix[0].size();
                     curr_turn = 0;
                 }
             }
-            ImGui::Checkbox("Pozar", &paint_fire);
 
             ImGui::NewLine();
+            ImGui::InputInt("Kierunek wiatru", &automat.wind_direction);
+            ImGui::Text("0 - brak");
+            ImGui::Text("1 - polnocny");
+            ImGui::Text("2 - wschodni");
+            ImGui::Text("3 - poludniowy");
+            ImGui::Text("4 - zachodni");
+
+            if(automat.wind_direction >= 4){automat.wind_direction = 4;}
+            else if(automat.wind_direction <=0){automat.wind_direction = 0;}
+
+            ImGui::InputInt("Prawdopodobienstwo zaplonu", &automat.burn_prop);
+            if(automat.burn_prop >= 100){wind_direction = 100;}
+            else if(automat.burn_prop <=0){wind_direction = 0;}
+
+
+            ImGui::NewLine();
+            ImGui::Checkbox("Pozar", &paint_fire);
+            ImGui::NewLine();
             ImGui::Checkbox("Automatyczne odtwarzanie", &auto_play);
-            ImGui::LabelText("Tura", "%d", curr_turn);
+            ImGui::LabelText("Tura", "%d", automat.iteration_count);
 
             bool next_turn = false;
             
@@ -124,8 +147,6 @@ int main(int argc, char* argv[]) {
             }
 
             if((automat.initialised && next_turn) || automat.initialised && auto_play){
-
-                curr_turn++;
                 automat.simulate_curr_state();
             }
 

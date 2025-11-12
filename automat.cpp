@@ -230,6 +230,7 @@ std::pair<int, int> Automaty::get_cell_at_mouse(int mouse_x, int mouse_y)
 
     return {-1, -1}; 
 }
+
 void Automaty::simulate_curr_state(){
 
     int cols_num = (int)this->pole.size();
@@ -238,22 +239,24 @@ void Automaty::simulate_curr_state(){
     if (rows_num == 0) return;
     
     std::vector<std::vector<block>> next = this->pole;
+
     
     for (int x = 0; x < cols_num; ++x) {
         for (int y = 0; y < rows_num; ++y) {
             
             int current_state = this->pole[x][y].state;
 
-            //splonelo
+            //wypala sie
             if (current_state == 1) {
-                if ((rand() % 20) == 1) { 
+                if ((rand() % 30 ) == 1) { 
                     next[x][y].state = 2;
                 }
                 continue; 
             }
 
-            if (current_state == 2) {
-                if ((rand() % 10000000000) == 1) { 
+            //spalone drzewo moze odrosnac
+            if (current_state == 2 && iteration_count > 800) {
+                if ((rand() % 100000000000000) == 1) { 
                     next[x][y].state = 0;
                 }
                 continue; 
@@ -262,7 +265,13 @@ void Automaty::simulate_curr_state(){
             //zyjace drzewo moze zaplonac
             if (current_state == 0) {
                 int burning_neighbors = 0;
+
+                int burning_left = 0;
+                int burning_right = 0;
+                int burning_top = 0;
+                int burning_bottom = 0;
                 
+                //zliczanie wszystkich
                 for (int dx = -1; dx <= 1; ++dx) {
                     for (int dy = -1; dy <= 1; ++dy) {
                         if (dx == 0 && dy == 0) continue; 
@@ -277,10 +286,172 @@ void Automaty::simulate_curr_state(){
                         }
                     }
                 }
+                int dx=0;
+                int dy=0;
+
+                int bot_burn=0;
+                int effective = 0;
                 
                 if (burning_neighbors > 0) {
-                    if ((rand() % 101) < this->burn_prop) {
-                        next[x][y].state = 1;
+                    switch (this->wind_direction)
+                    {
+                        case 0: //brak wiatru -> pozar rozprzestrzenia sie z akzdej strony na kazda
+                            if ((rand() % (501/burning_neighbors)) < this->burn_prop) {
+                                next[x][y].state = 1;
+                            }
+                        
+                        break;
+
+                        case 1: { // wiatr polnocny -> pozar rozprzestrzenia się w gore
+                            // Zliczamy palących się sąsiadów z wagami zależnie od kierunku
+                            effective = 0;
+                            for (int dx2 = -1; dx2 <= 1; ++dx2) {
+                                for (int dy2 = -1; dy2 <= 1; ++dy2) {
+                                    if (dx2 == 0 && dy2 == 0) continue;
+                                    int nx = x + dx2;
+                                    int ny = y + dy2;
+                                    if (nx >= 0 && nx < cols_num && ny >= 0 && ny < rows_num) {
+                                        if (this->pole[nx][ny].state == 1) {
+                                            if (ny == y + 1) {
+                                                // sąsiedzi z południa (downwind) – silnie zwiększają szansę
+                                                effective += 3;
+                                            } else if (ny == y) {
+                                                // boczni – niewielki wpływ
+                                                effective += 1;
+                                            } else {
+                                                // sąsiedzi z północy (upwind) – pomijamy / bardzo mały wpływ
+                                                // effective += 0;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (effective > 0) {
+                                // Im większe effective, tym mniejszy modulus i większa szansa zapłonu.
+                                // Dodatkowe wzmocnienie dla wiatru: dzielimy modulus przez 2.
+                                int mod = 501 / effective;              // rośnie szansa wraz z effective
+                                if (mod < 1) mod = 1;
+                                mod = std::max(1, mod/2);             // boost od wiatru
+
+                                if ((rand() % mod) < this->burn_prop) {
+                                    next[x][y].state = 1;
+                                }
+                            }
+                        } 
+                        break;
+
+                        case 3://wiatr poludniowy
+                            effective = 0;
+                            // Zliczamy palących się sąsiadów z wagami zależnie od kierunku
+                            for (int dx2 = -1; dx2 <= 1; ++dx2) {
+                                for (int dy2 = -1; dy2 <= 1; ++dy2) {
+                                    if (dx2 == 0 && dy2 == 0) continue;
+                                    int nx = x + dx2;
+                                    int ny = y + dy2;
+                                    if (nx >= 0 && nx < cols_num && ny >= 0 && ny < rows_num) {
+                                        if (this->pole[nx][ny].state == 1) {
+                                            if (ny == y + 1) {
+                                                // sąsiedzi z południa (downwind) – pomijamy / bardzo mały wpływ
+                                                //effective += 3;
+                                            } else if (ny == y) {
+                                                // boczni – niewielki wpływ
+                                                effective += 1;
+                                            } else {
+                                                // sąsiedzi z północy (upwind) – silnie zwiekszaja szanse
+                                                effective += 3;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (effective > 0) {
+                                // Im większe effective, tym mniejszy modulus i większa szansa zapłonu.
+                                // Dodatkowe wzmocnienie dla wiatru: dzielimy modulus przez 2.
+                                int mod = 501 / effective;              // rośnie szansa wraz z effective
+                                if (mod < 1) mod = 1;
+                                mod = std::max(1, mod/2);             // boost od wiatru
+
+                                if ((rand() % mod) < this->burn_prop) {
+                                    next[x][y].state = 1;
+                                }
+                            }
+                        
+                        break;
+
+                        case 2://wiatr wschodni
+                            effective = 0;
+                            // Zliczamy palących się sąsiadów z wagami zależnie od kierunku
+                            for (int dx2 = -1; dx2 <= 1; ++dx2) {
+                                for (int dy2 = -1; dy2 <= 1; ++dy2) {
+                                    if (dx2 == 0 && dy2 == 0) continue;
+                                    int nx = x + dx2;
+                                    int ny = y + dy2;
+                                    if (nx >= 0 && nx < cols_num && ny >= 0 && ny < rows_num) {
+                                        if (this->pole[nx][ny].state == 1) {
+                                            if (nx == x + 1) {
+                                                //effective += 3;
+                                            } else if (nx == x) {
+
+                                                effective += 1;
+                                            } else {
+                                                
+                                                effective += 3;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (effective > 0) {
+                                int mod = 501 / effective;             
+                                if (mod < 1) mod = 1;
+                                mod = std::max(1, mod/2);
+
+                                if ((rand() % mod) < this->burn_prop) {
+                                    next[x][y].state = 1;
+                                }
+                            }
+                        break;
+
+                        case 4://wiatr zachodni
+                            effective = 0;
+                            // Zliczamy palących się sąsiadów z wagami zależnie od kierunku
+                            for (int dx2 = -1; dx2 <= 1; ++dx2) {
+                                for (int dy2 = -1; dy2 <= 1; ++dy2) {
+                                    if (dx2 == 0 && dy2 == 0) continue;
+                                    int nx = x + dx2;
+                                    int ny = y + dy2;
+                                    if (nx >= 0 && nx < cols_num && ny >= 0 && ny < rows_num) {
+                                        if (this->pole[nx][ny].state == 1) {
+                                            if (nx == x + 1) {
+                                                effective += 3;
+                                            } else if (nx == x) {
+
+                                                effective += 1;
+                                            } else {
+                                                
+                                                //effective += 3;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (effective > 0) {
+                                int mod = 501 / effective;             
+                                if (mod < 1) mod = 1;
+                                mod = std::max(1, mod/2);
+
+                                if ((rand() % mod) < this->burn_prop) {
+                                    next[x][y].state = 1;
+                                }
+                            }
+                        break;
+                    
+                    default:
+                        break;
                     }
                 }
             }
@@ -288,6 +459,7 @@ void Automaty::simulate_curr_state(){
     }
 
     this->pole.swap(next);
+    this->iteration_count++;
 }
 
 void Automaty::paint_fire()
