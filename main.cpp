@@ -4,11 +4,12 @@
 #include "rlImGuiColors.h"
 
 #include <algorithm>
-
+#include <fstream>
 #include <stdio.h>
 
 #include "automat.h"
 #include "image.h"
+
 
 int screenWidth = 1280;
 int screenHeight = 768;
@@ -43,11 +44,8 @@ int main(int argc, char* argv[]) {
     //wind directions
     int wind_direction = 0;
 
-    static char file_path[256] = "";
-
-    std::string file_path_string;
-
-    std::string file_path_string_fixed = "D:/Code/Uczelnia/S5/mod_dys/cw5/image3.png";
+    //std::string file_path_string_fixed = "D:/Code/Uczelnia/S5/mod_dys/cw5/image3.png";
+    std::string file_path_string_fixed;
 
     while (running && !WindowShouldClose()) {
         BeginDrawing();
@@ -91,14 +89,7 @@ int main(int argc, char* argv[]) {
             const float maxScale = 4.0f;
             
             ImGui::BeginChild("Toolbar", ImVec2(toolbarWidth, 0.0f));
-            
-            if (ImGui::InputText("plik", file_path, sizeof(file_path), ImGuiInputTextFlags_EnterReturnsTrue)) {
-                std::cout << "You entered: " << file_path << std::endl;
-
-                file_path_string = std::string(file_path);
-
-            }
-            ImGui::NewLine();
+                    
             ImGui::Text("Rozmiar pola");
             ImGui::InputInt("X", &x_size);
             ImGui::InputInt("Y", &y_size);
@@ -107,14 +98,25 @@ int main(int argc, char* argv[]) {
             ImGui::NewLine();
 
             if(ImGui::Button("Generuj pole z obrazu")){
-                if(x_size != 0 ){
-                    std::vector<std::vector<int>> img_matrix = prepare_matrix(file_path_string_fixed, x_size);
-                    automat.init(img_matrix, screenHeight, screenWidth);
-                    automat.iteration_count = 0;
+                if(x_size != 0){
 
-                    x_size = img_matrix.size();
-                    y_size = img_matrix[0].size();
-                    curr_turn = 0;
+                    try{
+                        std::ifstream text_file("D:/Code/Uczelnia/S5/mod_dys/cw5/image_path.txt");
+                        
+                        getline(text_file, file_path_string_fixed);
+
+                        text_file.close();
+
+                        std::vector<std::vector<int>> img_matrix = prepare_matrix(file_path_string_fixed, x_size);
+                        automat.init(img_matrix, screenHeight, screenWidth);
+                        automat.iteration_count = 0;
+    
+                        x_size = img_matrix.size();
+                        y_size = img_matrix[0].size();
+                    } catch(...){
+                        std::cout<<"Nie udalo sie zaladowac pliku tekstowego\n";
+                    }
+
                 }
             }
 
@@ -126,12 +128,12 @@ int main(int argc, char* argv[]) {
             ImGui::Text("3 - poludniowy");
             ImGui::Text("4 - zachodni");
 
-            if(automat.wind_direction >= 4){automat.wind_direction = 4;}
-            else if(automat.wind_direction <=0){automat.wind_direction = 0;}
+            if(automat.wind_direction > 4){automat.wind_direction = 0;}
+            else if(automat.wind_direction <0){automat.wind_direction = 4;}
 
             ImGui::InputInt("Prawdopodobienstwo zaplonu", &automat.burn_prop);
-            if(automat.burn_prop >= 100){wind_direction = 100;}
-            else if(automat.burn_prop <=0){wind_direction = 0;}
+            if(automat.burn_prop >= 100){automat.burn_prop = 100;}
+            else if(automat.burn_prop <=0){automat.burn_prop = 0;}
 
 
             ImGui::NewLine();

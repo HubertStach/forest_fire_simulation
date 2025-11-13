@@ -248,7 +248,7 @@ void Automaty::simulate_curr_state(){
 
             //wypala sie
             if (current_state == 1) {
-                if ((rand() % 30 ) == 1) { 
+                if ((rand() % 50 ) == 1) { 
                     next[x][y].state = 2;
                 }
                 continue; 
@@ -271,6 +271,12 @@ void Automaty::simulate_curr_state(){
                 int burning_top = 0;
                 int burning_bottom = 0;
                 
+                int dx=0;
+                int dy=0;
+                
+                int bot_burn=0;
+                int effective = 0;
+                
                 //zliczanie wszystkich
                 for (int dx = -1; dx <= 1; ++dx) {
                     for (int dy = -1; dy <= 1; ++dy) {
@@ -286,17 +292,11 @@ void Automaty::simulate_curr_state(){
                         }
                     }
                 }
-                int dx=0;
-                int dy=0;
-
-                int bot_burn=0;
-                int effective = 0;
-                
                 if (burning_neighbors > 0) {
                     switch (this->wind_direction)
                     {
                         case 0: //brak wiatru -> pozar rozprzestrzenia sie z akzdej strony na kazda
-                            if ((rand() % (501/burning_neighbors)) < this->burn_prop) {
+                            if ((rand() % (401/burning_neighbors)) < this->burn_prop) {
                                 next[x][y].state = 1;
                             }
                         
@@ -328,11 +328,9 @@ void Automaty::simulate_curr_state(){
                             }
 
                             if (effective > 0) {
-                                // Im większe effective, tym mniejszy modulus i większa szansa zapłonu.
-                                // Dodatkowe wzmocnienie dla wiatru: dzielimy modulus przez 2.
-                                int mod = 501 / effective;              // rośnie szansa wraz z effective
+                                int mod = 501 / effective;
                                 if (mod < 1) mod = 1;
-                                mod = std::max(1, mod/2);             // boost od wiatru
+                                mod = std::max(1, mod/2);
 
                                 if ((rand() % mod) < this->burn_prop) {
                                     next[x][y].state = 1;
@@ -367,11 +365,9 @@ void Automaty::simulate_curr_state(){
                             }
 
                             if (effective > 0) {
-                                // Im większe effective, tym mniejszy modulus i większa szansa zapłonu.
-                                // Dodatkowe wzmocnienie dla wiatru: dzielimy modulus przez 2.
-                                int mod = 501 / effective;              // rośnie szansa wraz z effective
+                                int mod = 501 / effective;
                                 if (mod < 1) mod = 1;
-                                mod = std::max(1, mod/2);             // boost od wiatru
+                                mod = std::max(1, mod/2);
 
                                 if ((rand() % mod) < this->burn_prop) {
                                     next[x][y].state = 1;
