@@ -16,6 +16,8 @@ block::block(int x, int y, int new_state){
     this->x = x;
     this->y = y;
     this->state = new_state;
+
+    //this->iterations_burning = rand() % 16+10;
 }
 
 Automaty::Automaty(){
@@ -248,10 +250,13 @@ void Automaty::simulate_curr_state(){
 
             //wypala sie
             if (current_state == 1) {
-                if ((rand() % 50 ) == 1) { 
+                if(this->pole[x][y].iterations_burning == 0){
                     next[x][y].state = 2;
                 }
-                continue; 
+                else{
+                    next[x][y].iterations_burning--;
+                }
+
             }
 
             //spalone drzewo moze odrosnac

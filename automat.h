@@ -6,6 +6,7 @@ struct block{
     int x;
     int y;
     int state=0;
+    int iterations_burning = 10;
 
     block();
     block::block(int x, int y, int new_state=0);
