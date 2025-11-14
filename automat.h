@@ -26,15 +26,16 @@ struct Automaty{
     int y_start = 0;
     int y_end = 0;
     int cell_size=0;
-    int burn_prop = 0;
 
     int wind_direction = 0;
+    int moisture=40;
 
     Automaty();
 
     void init(int x_size, int y_size, int SCREEN_HEIGHT, int SCREEN_WIDTH);
     void init(std::vector<std::vector<int>> &matrix, int SCREEN_HEIGHT, int SCREEN_WIDTH);
     void visualise();
+    double calculate_ignition_prop(int x, int y, int cols_num, int rows_num);
     void simulate_curr_state();
     
     std::pair<int, int> get_cell_at_mouse(int mouse_x, int mouse_y);

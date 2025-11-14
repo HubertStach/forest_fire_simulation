@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     bool showDemoWindow = false;
     bool paint_fire = false;
 
-    automat.burn_prop = 10;
+    automat.moisture = 40;
 
     //wind directions
     int wind_direction = 0;
@@ -131,9 +131,9 @@ int main(int argc, char* argv[]) {
             if(automat.wind_direction > 4){automat.wind_direction = 0;}
             else if(automat.wind_direction <0){automat.wind_direction = 4;}
 
-            ImGui::InputInt("Prawdopodobienstwo zaplonu", &automat.burn_prop);
-            if(automat.burn_prop >= 100){automat.burn_prop = 100;}
-            else if(automat.burn_prop <=0){automat.burn_prop = 0;}
+            ImGui::InputInt("Wilgotnosc", &automat.moisture);
+            if(automat.moisture >= 100){automat.moisture = 100;}
+            else if(automat.moisture <=0){automat.moisture = 0;}
 
 
             ImGui::NewLine();
