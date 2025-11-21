@@ -1,1 +1,2 @@
-D:/Code/Uczelnia/S5/mod_dys/cw5/image.jpg
+D:/Code/Uczelnia/S5/mod_dys/cw5/images/solina_img.png
+D:/Code/Uczelnia/S5/mod_dys/cw5/images/solina_ter.png

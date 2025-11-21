@@ -10,12 +10,14 @@ block::block()
     this->x = 0;
     this->y = 0;
     this->state = 0;
+    this->height = 0;
 }
 
-block::block(int x, int y, int new_state){
+block::block(int x, int y, int new_state, int height){
     this->x = x;
     this->y = y;
     this->state = new_state;
+    this->height = height;
 
     //this->iterations_burning = rand() % 16+10;
 }
@@ -24,84 +26,28 @@ Automaty::Automaty(){
     this->pole.assign(1, std::vector<block>(1));
 }
 
-void Automaty::init(int x_size, int y_size, int SCREEN_HEIGHT, int SCREEN_WIDTH)
+void Automaty::init(std::vector<std::vector<int>> &matrix_img, std::vector<std::vector<int>> &matrix_ter, int SCREEN_HEIGHT, int SCREEN_WIDTH)
 {
-    this->pole.assign(x_size, std::vector<block>(y_size));
-
-    for (int i = 0; i < x_size; ++i) {
-        for (int j = 0; j < y_size; ++j) {
-            int state = 0;
-            if(rand()%100001 == 1){
-                state = 1;
-            }
-
-            pole[i][j] = block(i, j, state);
-        }
-    }
-    
-
-    int toolbar_width = 250; //stała w programie
-    int margin = 20; //żeby jakoś lepiej wyglądało
-
-    int x_start, x_end, y_start, y_end;
-
-    x_start = toolbar_width + margin;
-    x_end = SCREEN_WIDTH - margin;
-    y_start = margin;
-    y_end = SCREEN_HEIGHT - margin;
-    
-    //cale pole do rysowania
-    int board_width = x_end - x_start; 
-    int board_height = y_end - y_start;
-
-    int cols = x_size;
-    int rows = y_size;
-
-    if (cols == 0 || rows == 0) return; //plansza pusta
-
-    int cell_w = board_width / cols;
-    int cell_h = board_height / rows;
-    int cell_size = (cell_w < cell_h) ? cell_w : cell_h;
-    if (cell_size <= 0) return;
-
-    //liczymy środek planszy
-    int used_width = cell_size * cols;
-    int used_height = cell_size * rows;
-
-    int offset_x = x_start + (board_width - used_width) / 2;
-    int offset_y = y_start + (board_height - used_height) / 2;
-
-    this->px = px;
-    this->py = py;
-    this->cell_h = cell_h;
-    this->cell_w = cell_w;
-    this->x_start = x_start;
-    this->x_end = x_end;
-    this->y_start = y_start;
-    this->y_end = y_end;
-    this->cell_size = cell_size;
-
-    this->initialised = true;
-
-    std::cout<<"used_width = "<<cell_size * cols<<"\n";
-    std::cout<<"used_height = "<<cell_size * rows<<"\n";
-
-}
-
-void Automaty::init(std::vector<std::vector<int>> &matrix, int SCREEN_HEIGHT, int SCREEN_WIDTH)
-{
-    int rows = matrix.size();
-    int cols = matrix[0].size();
+    int rows = matrix_img.size();
+    int cols = matrix_img[0].size();
     
     this->pole.assign(rows, std::vector<block>(cols));
+    int temp_height = 0;
 
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {  
-            int state = matrix[i][j];
+            int state = matrix_img[i][j];
+            int height = matrix_ter[i][j];
 
-            pole[i][j] = block(i, j, state);
+            if(height >= temp_height){
+                temp_height = height;
+            }
+
+            pole[i][j] = block(i, j, state, height);
         }
     }
+
+    this->max_height=temp_height;
     
     int toolbar_width = 250; //stała w programie
     int margin = 20; //żeby jakoś lepiej wyglądało
@@ -142,6 +88,8 @@ void Automaty::init(std::vector<std::vector<int>> &matrix, int SCREEN_HEIGHT, in
     this->cell_size = cell_size;
 
     this->initialised = true;
+
+    std::cout<<this->max_height<<"\n";
 
     //std::cout<<"used_width = "<<cell_size * cols<<"\n";
     //std::cout<<"used_height = "<<cell_size * rows<<"\n";
@@ -176,7 +124,20 @@ void Automaty::visualise()
 
             //drzewo zyje
             if(pole[i][j].state == 0){
-                col = GREEN;
+
+                float max_height_f = (float)this->max_height;
+                float h_curr = (float)pole[i][j].height;
+
+                if (h_curr > max_height) h_curr = max_height;
+
+                float brightness = 0.3f + (h_curr / max_height) *  0.7f;
+
+                Color base = GREEN; 
+
+                col.r = (unsigned char)(base.r * brightness);
+                col.g = (unsigned char)(base.g * brightness);
+                col.b = (unsigned char)(base.b * brightness);
+                col.a = 255;
             }
 
             //plonie
@@ -321,17 +282,7 @@ void Automaty::simulate_curr_state(){
                 }
 
             }
-
-            //spalone drzewo moze odrosnac
-            /*
-            if (current_state == 2 && iteration_count > 1000) {
-                if ((rand() % 100000000000000) == 1) { 
-                    next[x][y].state = 0;
-                }
-                continue; 
-            }*/
-
-            //drzewo moze sie zapalic
+            
             if (current_state == 0) {
                 double ignition_prob = calculate_ignition_prop(x, y, cols_num, rows_num);
                 

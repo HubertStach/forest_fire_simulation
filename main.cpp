@@ -103,12 +103,19 @@ int main(int argc, char* argv[]) {
                     try{
                         std::ifstream text_file("D:/Code/Uczelnia/S5/mod_dys/cw5/image_path.txt");
                         
-                        getline(text_file, file_path_string_fixed);
+                        std::vector<std::string> file_paths;
+                        std::string string_temp;
+
+                        while(getline(text_file, string_temp)){
+                            file_paths.push_back(string_temp);
+                        }
 
                         text_file.close();
 
-                        std::vector<std::vector<int>> img_matrix = prepare_matrix(file_path_string_fixed, x_size);
-                        automat.init(img_matrix, screenHeight, screenWidth);
+                        std::vector<std::vector<int>> img_matrix = prepare_matrix_img(file_paths[0], x_size);
+                        std::vector<std::vector<int>> img_matrix_ter = prepare_matrix_ter(file_paths[1], x_size);
+
+                        automat.init(img_matrix, img_matrix_ter, screenHeight, screenWidth);
                         automat.iteration_count = 0;
     
                         x_size = img_matrix.size();

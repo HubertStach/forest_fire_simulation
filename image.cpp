@@ -98,7 +98,7 @@ cv::Mat binary(cv::Mat img, int amount){
     }
 }
 
-std::vector<std::vector<int>> prepare_matrix(std::string image_path, int height){
+std::vector<std::vector<int>> prepare_matrix_img(std::string image_path, int height){
 
     try{
         cv::Mat image = open_file(image_path);
@@ -138,6 +138,55 @@ std::vector<std::vector<int>> prepare_matrix(std::string image_path, int height)
 
                 if(value == 0){value = 0;}
                 else{value = 3;}
+
+                result_mat[i][j] = value;
+            }
+        }
+
+        return result_mat;
+
+    }catch(cv::Exception& e){
+        const char* err_msg = e.what();
+        std::cout << "exception caught: " << err_msg << std::endl;
+        std::vector<std::vector<int>> result_mat(3, std::vector<int> (3));
+        return result_mat;
+    }
+}
+
+std::vector<std::vector<int>> prepare_matrix_ter(std::string image_path, int height){
+
+    try{
+        cv::Mat image = open_file(image_path);
+
+        // Transpozycja obrazu (zamiana wierszy z kolumnami)
+        cv::Mat transposed_image;
+        cv::transpose(image, transposed_image);
+
+        // Skalowanie do wysokości 200 z zachowaniem proporcji
+        int target_height = height;
+        int original_height = transposed_image.rows;
+        int original_width = transposed_image.cols;
+        
+        // Oblicz nową szerokość zachowując proporcje
+        double scale_factor = static_cast<double>(target_height) / original_height;
+        int target_width = static_cast<int>(original_width * scale_factor);
+        
+        // Przeskaluj obraz
+        cv::Mat resized_image;
+        cv::resize(transposed_image, resized_image, cv::Size(target_width, target_height), 0, 0, cv::INTER_LINEAR);
+
+        //cv::imshow("Window", resized_image);
+        //cv::waitKey(0);
+
+        int rows = resized_image.rows;
+        int cols = resized_image.cols;       
+        
+        std::vector<std::vector<int>> result_mat(rows, std::vector<int> (cols));
+
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < cols; j++){
+                cv::Vec3b bgr_pixel = resized_image.at<cv::Vec3b>(i,j);
+                int value = bgr_pixel[0];
 
                 result_mat[i][j] = value;
             }

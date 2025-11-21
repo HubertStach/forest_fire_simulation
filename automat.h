@@ -7,9 +7,10 @@ struct block{
     int y;
     int state=0;
     int iterations_burning = 10;
+    int height = 0;
 
     block();
-    block::block(int x, int y, int new_state=0);
+    block::block(int x, int y, int new_state=0, int height = 0);
 };
 
 struct Automaty{
@@ -29,11 +30,12 @@ struct Automaty{
 
     int wind_direction = 0;
     int moisture=40;
+    int max_height=0;
 
     Automaty();
 
     void init(int x_size, int y_size, int SCREEN_HEIGHT, int SCREEN_WIDTH);
-    void init(std::vector<std::vector<int>> &matrix, int SCREEN_HEIGHT, int SCREEN_WIDTH);
+    void init(std::vector<std::vector<int>> &matrix_img, std::vector<std::vector<int>> &matrix_ter, int SCREEN_HEIGHT, int SCREEN_WIDTH);
     void visualise();
     double calculate_ignition_prop(int x, int y, int cols_num, int rows_num);
     void simulate_curr_state();
