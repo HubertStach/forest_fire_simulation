@@ -13,6 +13,15 @@ struct block{
     block::block(int x, int y, int new_state=0, int height = 0);
 };
 
+struct Options{
+    double BASE_SPREAD_RATE = 0.1;
+    double DIAGONAL_FACTOR = 0.7;
+    double WIND_BOOST_STRONG = 2.1;
+    double WIND_BOOST_SIDE = 1.1;
+    double WIND_PENALTY_AGAINST = 0.3;
+    double SLOPE_SENSITIVITY = 1.1;
+};
+
 struct Automaty{
     std::vector<std::vector<block>> pole;
 
@@ -31,6 +40,8 @@ struct Automaty{
     int wind_direction = 0;
     int moisture=40;
     int max_height=0;
+
+    Options opcje;
 
     Automaty();
 

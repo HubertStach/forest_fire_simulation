@@ -159,6 +159,14 @@ int main(int argc, char* argv[]) {
                 automat.simulate_curr_state();
             }
 
+            ImGui::NewLine();
+            ImGui::InputDouble("Base spread rate", &automat.opcje.BASE_SPREAD_RATE);
+            ImGui::InputDouble("Diagonal factor", &automat.opcje.DIAGONAL_FACTOR);
+            ImGui::InputDouble("Wind strong", &automat.opcje.WIND_BOOST_STRONG);
+            ImGui::InputDouble("Wind side", &automat.opcje.WIND_BOOST_SIDE);
+            ImGui::InputDouble("Wind against", &automat.opcje.WIND_PENALTY_AGAINST);
+            ImGui::InputDouble("Slope sensitivity", &automat.opcje.SLOPE_SENSITIVITY);
+
             ImGui::EndChild();
 
             ImGui::SameLine();
